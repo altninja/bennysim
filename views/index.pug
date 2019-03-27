@@ -1,0 +1,59 @@
+extends _layout
+
+block content
+	h1.pull-right V1
+	p.pull-right Return Of The Bennycoin
+	.row
+		.col-md-12
+			h1(style='font-size: 48px;') BennySim: SelfKey Network Simulation Tool
+			hr
+			.row
+				.col-md-4
+					h3 KEY Price Info
+					hr
+					pre #{key.name}
+					pre #{key.rank}
+					pre #{key.price_btc}
+					pre #{key.price_usd}
+					pre #{key.market_cap_usd}
+					pre #{key.available_supply}
+					pre #{key.total_supply}
+				.col-md-4
+					h3 ETH Price Info
+					hr
+					pre #{eth.name}
+					pre #{eth.rank}
+					pre #{eth.price_btc}
+					pre #{eth.price_usd}
+					pre #{eth.market_cap_usd}
+					pre #{eth.available_supply}
+					pre #{eth.total_supply}
+				form.col-md-4(method='POST', action='/sim')
+					h3 Setup BennySim
+					hr
+					input(type='hidden', name='_csrf', value=_csrf)
+					//- input(type='hidden', name='key', value=key)
+					//- input(type='hidden', name='eth', value=eth)
+					.form-group
+						input.form-control(type='text', name='time', id='time', placeholder='Time Increments (Default 10)')
+					.form-group
+						input.form-control(type='text', name='joinRate', id='joinRate', placeholder='Join Rate (Default 25)')
+					.form-group
+						input.form-control(type='text', name='depositRate', id='depositRate', placeholder='Deposit Rate (Default 0.02)')
+					.form-group
+						input.form-control(type='text', name='revokeRate', id='revokeRate', placeholder='Revoke Rate (Default 0.80')
+					.form-group
+						input.form-control(type='text', name='buyRate', id='buyRate', placeholder='Buy Rate (Default 0.01)')
+					.form-group
+						input.form-control(type='text', name='deposit', id='deposit', placeholder='Deposit Amount (Default 10000)')
+					.form-group.text-center
+						button#run.btn.btn-success.btn-block(type='submit')
+							i.fa.fa-rocket
+							| &nbsp;Run Simulation
+			br
+			br
+			#loading.alert.alert-info.hidden.col-md-offset-3.col-md-6.text-center
+				h2 
+					i.fa.fa-rocket
+					| &nbsp;Running BennySim...
+

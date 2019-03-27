@@ -1,0 +1,10 @@
+[
+	{
+		"address": 111,
+		"vendorId": 123
+	},
+	{
+		"address": 112,
+		"vendorId": 456
+	}
+]

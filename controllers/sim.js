@@ -5,6 +5,7 @@ const runSim = require('../main/sim')
 
 const Sale = require('../db/models/sale')
 const Deposit = require('../db/models/deposit')
+const User = require('../db/models/user')
 
 async function postSim(req, res) {
 	try {
@@ -12,11 +13,13 @@ async function postSim(req, res) {
 		let rawResults = await runSim(config)
 		let sales = await Sale.find({})
 		let deposits = await Deposit.find({})
+		let users = await User.find({})
 		res.render('results', {
 			results: rawResults,
 			stringResults: JSON.stringify(rawResults),
 			sales,
-			deposits
+			deposits,
+			users
 		})
 	} catch (e) {
 		res.redirect('/error')

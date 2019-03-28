@@ -43,6 +43,29 @@ block content
 						.col-md-6
 							canvas#dailyUsers
 					hr
+					table.table.table-striped#usersTable
+						thead
+							tr
+								th User ID
+								th Address
+								th Key Balance
+								th Turn
+								th
+							tbody
+								for user in users
+									tr
+										td
+											p #{user.userId}
+										td
+											p #{user.address}
+										td
+											p #{user.keyBalance}
+										td
+											p #{user.turn}
+										td
+											a.btn.btn-xs.btn-info(href='#')
+												| 
+												i.fa.fa-leaf
 				#sales.tab-pane(role='tabpanel')
 					.row
 						h2 Sales Charts

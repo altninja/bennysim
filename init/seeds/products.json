@@ -1,0 +1,32 @@
+[
+	{
+		"sku": "001",
+		"vendorId": 123,
+		"price": 1800
+	},
+	{
+		"sku": "002",
+		"vendorId": 123,
+		"price": 2300
+	},
+	{
+		"sku": "003",
+		"vendorId": 123,
+		"price": 1900
+	},
+	{
+		"sku": "004",
+		"vendorId": 456,
+		"price": 2000
+	},
+	{
+		"sku": "005",
+		"vendorId": 456,
+		"price": 4700
+	},
+	{
+		"sku": "006",
+		"vendorId": 456,
+		"price": 6800
+	}
+]

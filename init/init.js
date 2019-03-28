@@ -30,8 +30,10 @@ const cmc = require('../helpers/cmc')
 const binance = require('../helpers/binance')
 
 const Sale = require('../db/models/sale')
-
+const User = require('../db/models/user')
+const Deposit = require('../db/models/deposit')
 const Vendor = require('../db/models/vendor')
+
 const vendorSeeds = require('../init/seeds/vendors')
 
 async function init(config) {
@@ -40,6 +42,8 @@ async function init(config) {
 		// Clear DB
 		await Vendor.deleteMany({})
 		await Sale.deleteMany({})
+		await User.deleteMany({})
+		await Deposit.deleteMany({})
 		
 		// Seed Vendors to DB
 		for (let vendor of vendorSeeds) {

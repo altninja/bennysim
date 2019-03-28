@@ -8,6 +8,7 @@ const saleSchema = new mongoose.Schema({
     price: Number,
     sku: String,
     vendorId: String,
+    userId: String,
     turn: Number
 
 }, { timestamps: true })

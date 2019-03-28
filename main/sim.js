@@ -5,6 +5,9 @@ const python = require('../helpers/python')
 const Sale = require('../db/models/sale')
 const Vendor = require('../db/models/vendor')
 const Deposit = require('../db/models/deposit')
+const User = require('../db/models/user')
+
+const products = require('../init/seeds/products')
 
 function runSim(config) {
 	return new Promise( async (resolve, reject) => {
@@ -60,6 +63,7 @@ function runSim(config) {
 			jssim.SimEvent.call(this, rank)
 			
 			this.id = address
+			//let user = User.findOne({userId: address})
 			this.keyBalance = Math.random(50,10000) * 1000000
 			this.keyTokenBuys = []
 			this.keyTokenSells = []
@@ -82,7 +86,7 @@ function runSim(config) {
 			let rank = 3
 			jssim.SimEvent.call(this, rank)
 
-			let vendor = Vendor.findOne({vendorId: this.vendorId})
+			let vendor = Vendor.findOne({vendorId: vendorId})
 			this.id = address
 			this.vendorId = vendorId
 			this.keyBalance = vendor.keyBalance
@@ -140,28 +144,33 @@ function runSim(config) {
 			
 			// Buy MP
 			if (this.deposited === true && buy > (1 - BUY_RATE)) {
+				console.log('HERE')
 				
 				// Create sale price
-				let price = Math.random(50,1000) * 1000000
-				
+
+				let product = products[Math.floor(Math.random() * products.length)]
+				let price = product.price / keyPrice
+
 				// Update user KEY balance
 				this.keyBalance = this.keyBalance - price
+				await User.updateOne({address: this.id},{keyBalance: this.keyBalance})
 				
 				// Update vendor KEY balance
-				let srp = await Vendor.findOne({vendorId: 456})
-				await Vendor.updateOne({vendorId: 456},{keyBalance: (srp.keyBalance + price)})
-				
+				let stateVendor = await Vendor.findOne({vendorId: product.vendorId})
+				await Vendor.updateOne({vendorId: product.vendorId},{keyBalance: (stateVendor.keyBalance + price)})
+
 				// Update SelfKey Sales and Revenue
 				skSales++
 				skRevenue = skRevenue + price
-				
+
 				// Save the sale to the DB
 				Sale.create({
-					price: price,
-					sku: 123,
-					vendorId: 456,
+					price: product.price,
+					sku: product.sku,
+					vendorId: product.vendorId,
 					turn: this.time
 				})
+				console.log('HERE2')
 			}
 
 			// de-increment timelock
@@ -177,7 +186,7 @@ function runSim(config) {
 				this.deposited = false
 				skDeposits = skDeposits - 1
 			}
-
+			console.log('WHY?')
 			return
 		}
 
@@ -250,6 +259,12 @@ function runSim(config) {
 					scheduler.scheduleRepeatingIn(user, 1)
 					skUsers++
 					stepUsers++
+					User.create({
+						userId: address,
+						address: address,
+						keyBalance: 0,
+						turn: timesRun
+					})
 				}
 			}
 
@@ -286,7 +301,7 @@ function runSim(config) {
 
 			// End the simulation run once the time config has run the steps
 			if (timesRun  == timeSet) {
-
+				console.log('NEVER?')
 				// do one last stats update
 				totalUsers.push(skUsers)
 				totalSales.push(skSales)

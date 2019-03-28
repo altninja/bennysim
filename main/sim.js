@@ -1,6 +1,10 @@
 'use strict'
 
 const jssim = require('js-simulator')
+
+const uuid = require('uuid/v4')
+const hexId = require('uuid-to-hex')
+
 const python = require('../helpers/python')
 const Sale = require('../db/models/sale')
 const Vendor = require('../db/models/vendor')
@@ -144,12 +148,10 @@ function runSim(config) {
 			
 			// Buy MP
 			if (this.deposited === true && buy > (1 - BUY_RATE)) {
-				console.log('HERE')
 				
 				// Create sale price
-
 				let product = products[Math.floor(Math.random() * products.length)]
-				let price = product.price / keyPrice
+				let price = (product.price / keyPrice * 100)
 
 				// Update user KEY balance
 				this.keyBalance = this.keyBalance - price
@@ -170,7 +172,7 @@ function runSim(config) {
 					vendorId: product.vendorId,
 					turn: this.time
 				})
-				console.log('HERE2')
+
 			}
 
 			// de-increment timelock
@@ -186,7 +188,6 @@ function runSim(config) {
 				this.deposited = false
 				skDeposits = skDeposits - 1
 			}
-			console.log('WHY?')
 			return
 		}
 
@@ -254,7 +255,8 @@ function runSim(config) {
 			// uses JOIN_RATE global constant for how many users joining per day
 			for (let i = 0; i < 100; i++) {
 				if ((Math.random()*100) > JOIN_RATE) {
-					let address = Math.random()
+
+					let address = new String('0x' + hexId(uuid()))
 					let user = new USER(address)
 					scheduler.scheduleRepeatingIn(user, 1)
 					skUsers++

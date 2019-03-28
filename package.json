@@ -23,7 +23,7 @@
       "type": "GPL-3.0",
       "url": "https://opensource.org/licenses/GPL-3.0"
     }
-  ],    
+  ],
   "bugs": {
     "url": "https://github.com/SelfKeyFoundation/selfkey-simulation/issues"
   },
@@ -37,7 +37,9 @@
     "pug": "^2.0.3",
     "python-shell": "^1.0.7",
     "request": "^2.88.0",
-    "request-promise-native": "^1.0.7"
+    "request-promise-native": "^1.0.7",
+    "uuid": "^3.3.2",
+    "uuid-to-hex": "^1.0.3"
   },
   "devDependencies": {
     "nodemon": "^1.18.4"

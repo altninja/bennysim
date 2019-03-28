@@ -3,57 +3,115 @@ extends _layout
 block content
 	.row
 		.col-md-12
-			a.btn.btn-primary.pull-right(href='/', style="margin-top: 10px;") Back to Setup
+			a.btn.btn-primary.pull-right(href='/', style="margin-top: 10px;") New Simulation
 			h1 BennySim Network Simulation Results
 			hr
-	
-			.row.text-center
-				.col-md-2.well(style="margin-right: 10px; background: rgb(87, 101, 116); color: #fff;")
-					h2 Time
-					h2 #{results.totalTime} Days
+			.well(style="padding: 10px; background: rgb(87, 101, 116); color: #fff;")
+				h3(style="margin: 0px;") Total Elapsed Simulation Time: #{results.totalTime} Days
+			row.text-center
 				.col-md-2.well(style="margin-right: 10px; background: rgb(46, 134, 222);")
 					h2 Users
 					h2 #{results.skUsers} Users
 				.col-md-2.well(style="margin-right: 10px; background: rgb(238, 82, 83);")
 					h2 Sales
 					h2 #{results.skSales} Sales
-				.col-md-2.well(style="margin-right: 10px; background: rgb(29, 209, 161);")
+				.col-md-4.well(style="margin-right: 10px; background: rgb(29, 209, 161);")
 					h2 Revenue
 					h2 #{results.skRevenue} KEY
 				.col-md-3.well(style="background: rgb(255, 159, 67);")
 					h2 Deposits
-					h2 #{results.skTotalStaked} KEY
-			hr
-			pre #{stringResults}
-			hr
-			.row
-				h2 User Charts
-				.col-md-6
-					canvas#totalUsers
-				.col-md-6
-					canvas#dailyUsers
-			hr
-			.row
-				h2 Sales Charts
-				.col-md-6
-					canvas#totalSales
-				.col-md-6
-					canvas#dailySales
-			hr
-			.row
-				h2 Revenue Charts (In KEY)
-				.col-md-6
-					canvas#totalRevenue
-				.col-md-6
-					canvas#dailyRevenue
-			hr
-			.row
-				h2 Staked Charts (In KEY)
-				.col-md-6
-					canvas#totalStaked
-				.col-md-6
-					canvas#dailyStaked
-	
+					h2 #{results.skTotalDeposited} KEY
+		
+	.row
+		.col-md-12
+			ul.nav.nav-tabs(role='tablist')
+				li.active(role='presentation')
+					a(href='#users', aria-controls='home', role='tab', data-toggle='tab') Users
+				li(role='presentation')
+					a(href='#sales', aria-controls='profile', role='tab', data-toggle='tab') Sales
+				li(role='presentation')
+					a(href='#revenue', aria-controls='messages', role='tab', data-toggle='tab') Revenue
+				li(role='presentation')
+					a(href='#deposits', aria-controls='settings', role='tab', data-toggle='tab') Deposits
+			
+			.tab-content
+				#users.tab-pane.active(role='tabpanel')
+					.row
+						h2 User Charts
+						.col-md-6
+							canvas#totalUsers
+						.col-md-6
+							canvas#dailyUsers
+					hr
+				#sales.tab-pane(role='tabpanel')
+					.row
+						h2 Sales Charts
+						.col-md-6
+							canvas#totalSales
+						.col-md-6
+							canvas#dailySales
+					hr
+					table.table.table-striped#salesTable
+						thead
+							tr
+								th Product ID
+								th Price
+								th Vendor ID
+								th Turn
+								th
+							tbody
+								for sale in sales
+									tr
+										td
+											p #{sale.sku}
+										td
+											p #{sale.price}
+										td
+											p #{sale.vendorId}
+										td
+											p #{sale.turn}
+										td
+											a.btn.btn-xs.btn-info(href='#')
+												| 
+												i.fa.fa-leaf
+
+				#revenue.tab-pane(role='tabpanel')
+					.row
+						h2 Revenue Charts (In KEY)
+						.col-md-6
+							canvas#totalRevenue
+						.col-md-6
+							canvas#dailyRevenue
+					hr
+
+				#deposits.tab-pane(role='tabpanel')
+					.row
+						h2 Deposit Charts (In KEY)
+						.col-md-6
+							canvas#totalDeposited
+						.col-md-6
+							canvas#dailyDeposited
+					hr
+					table.table.table-striped#depositsTable
+						thead
+							tr
+								th User ID
+								th Amount
+								th Turn
+								th
+							tbody
+								for deposit in deposits
+									tr
+										td
+											p #{deposit.userId}
+										td
+											p #{deposit.deposit}
+										td
+											p #{deposit.turn}
+										td
+											a.btn.btn-xs.btn-info(href='#')
+												| 
+												i.fa.fa-leaf
 	script.
 		let ctx1 = document.getElementById('totalUsers').getContext('2d')
 		let ctx2 = document.getElementById('dailyUsers').getContext('2d')
@@ -61,8 +119,8 @@ block content
 		let ctx4 = document.getElementById('dailySales').getContext('2d')
 		let ctx5 = document.getElementById('totalRevenue').getContext('2d')
 		let ctx6 = document.getElementById('dailyRevenue').getContext('2d')
-		let ctx7 = document.getElementById('totalStaked').getContext('2d')
-		let ctx8 = document.getElementById('dailyStaked').getContext('2d')
+		let ctx7 = document.getElementById('totalDeposited').getContext('2d')
+		let ctx8 = document.getElementById('dailyDeposited').getContext('2d')
 		
 		// USERS
 		let chart = new Chart(ctx1, {
@@ -116,7 +174,7 @@ block content
 		            label: 'Sales Per Day',
 		            backgroundColor: 'rgb(238, 82, 83)',
 		            borderColor: 'rgb(238, 82, 83)',
-		            data: [#{results.usersPerTurn}]
+		            data: [#{results.salesPerTurn}]
 		        }]
 		    },
 		    options: {}
@@ -145,13 +203,13 @@ block content
 		            label: 'Revenue Per Day',
 		            backgroundColor: 'rgb(29, 209, 161)',
 		            borderColor: 'rgb(29, 209, 161)',
-		            data: [#{results.usersPerTurn}]
+		            data: [#{results.revenuePerTurn}]
 		        }]
 		    },
 		    options: {}
 		})
 
-		// STAKED
+		// DEPOSITS
 		let chart7 = new Chart(ctx7, {
 		    type: 'line',
 		    data: {
@@ -174,7 +232,7 @@ block content
 		            label: 'KEY Deposited Per Day',
 		            backgroundColor: 'rgb(255, 159, 67)',
 		            borderColor: 'rgb(255, 159, 67)',
-		            data: [#{results.usersPerTurn}]
+		            data: [#{results.depositsPerTurn}]
 		        }]
 		    },
 		    options: {}

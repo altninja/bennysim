@@ -4,6 +4,7 @@ const jssim = require('js-simulator')
 const python = require('../helpers/python')
 const Sale = require('../db/models/sale')
 const Vendor = require('../db/models/vendor')
+const Deposit = require('../db/models/deposit')
 
 function runSim(config) {
 	return new Promise( async (resolve, reject) => {
@@ -26,9 +27,9 @@ function runSim(config) {
 		let skUsers = 0
 		let skSales = 0
 		let skRevenue = 0
-		let skStakes = 0
-		let skCurrentStaked = 0
-		let skTotalStaked = 0
+		let skDeposits = 0
+		let skCurrentDeposited = 0
+		let skTotalDeposited = 0
 
 		// Increment for time tracking / end sim
 		let timesRun = 0
@@ -113,25 +114,32 @@ function runSim(config) {
 			// Deposit KEY
 			if (buy > (1 - DEPOSIT_RATE) && this.keyBalance > SK_DEPOSIT) {
 				
-				// Create stake object
-				let stakeObj = {
+				// Create Deposit object
+				let depositObj = {
 					deposit: SK_DEPOSIT,
 					timelock: 30
 				}
 				
 				// Update user KEY balance
-				this.keyBalance = this.keyBalance - stakeObj.deposit
-				this.stake = true
+				this.keyBalance = this.keyBalance - depositObj.deposit
+				this.deposited = true
 				this.deposit = SK_DEPOSIT
-				this.stakeTimelock = 30
+				this.depositTimelock = 30
 				
 				// Update SelfKey Staking Data
-				skStakes++
-				skTotalStaked = skTotalStaked + stakeObj.deposit
+				skDeposits++
+				skTotalDeposited = skTotalDeposited + depositObj.deposit
+
+				// Save the deposit to the DB
+				Deposit.create({
+					deposit: this.deposit,
+					userId: this.id,
+					turn: this.time
+				})
 			}
 			
 			// Buy MP
-			if (this.stake === true && buy > (1 - BUY_RATE)) {
+			if (this.deposited === true && buy > (1 - BUY_RATE)) {
 				
 				// Create sale price
 				let price = Math.random(50,1000) * 1000000
@@ -151,22 +159,23 @@ function runSim(config) {
 				Sale.create({
 					price: price,
 					sku: 123,
-					vendorId: 456
+					vendorId: 456,
+					turn: this.time
 				})
 			}
 
 			// de-increment timelock
-			if (this.stake === true && this.stakeTimelock > 0) {
-				this.stakeTimelock = this.stakeTimelock - 1
+			if (this.deposited === true && this.depositTimelock > 0) {
+				this.depositTimelock = this.depositTimelock - 1
 			}
 
 			// Revoke Deposit
-			if (this.stake === true && this.stakeTimelock === 0 && buy > (1 - REVOKE_RATE)) {
-				skTotalStaked = skTotalStaked - this.deposit
+			if (this.deposited === true && this.depositTimelock === 0 && buy > (1 - REVOKE_RATE)) {
+				skTotalDeposited = skTotalDeposited - this.deposit
 				this.balance = this.balance + this.deposit
 				this.deposit = 0
-				this.stake = false
-				skStakes = skStakes - 1
+				this.deposited = false
+				skDeposits = skDeposits - 1
 			}
 
 			return
@@ -232,12 +241,6 @@ function runSim(config) {
 			// Update the labels array for the UI Charts etc...
 			timeLabels.push(timesRun.toString())
 			
-			// Update cummulative data for charts
-			totalUsers.push(skUsers)
-			totalSales.push(skSales)
-			totalRevenue.push(skRevenue)
-			totalDeposits.push(skTotalStaked)
-			
 			// New Users join the network (download the wallet)
 			// uses JOIN_RATE global constant for how many users joining per day
 			for (let i = 0; i < 100; i++) {
@@ -253,19 +256,47 @@ function runSim(config) {
 			// Run the update function for all the Agents
 			scheduler.update()
 
+			// Get the sales total for the turn
+			stepSales = await Sale.find({turn: scheduler.current_time})
+			for (let sale of stepSales) {
+				stepRevenue = stepRevenue + sale.price
+			}
+
+			// Get the deposit total for the turn
+			let allDeposits = await Deposit.find({turn: scheduler.current_time})
+			for (let deposit of allDeposits) {
+				stepDeposits = stepDeposits + deposit.deposit
+			}
+
+			// Update cummulative data for charts
+			totalUsers.push(skUsers)
+			totalSales.push(skSales)
+			totalRevenue.push(Math.round(skRevenue))
+			totalDeposits.push(Math.round(skTotalDeposited))
+
 			// Update increment data for charts
 			usersPerTurn.push(stepUsers)
-			salesPerTurn.push(stepSales)
-			revenuePerTurn.push(stepRevenue)
-			depositsPerTurn.push(stepDeposits)
+			salesPerTurn.push(stepSales.length)
+			revenuePerTurn.push(Math.round(stepRevenue))
+			depositsPerTurn.push(Math.round(stepDeposits))
 
 			// Test Python integration
 			let pythonData = await python(skUsers, './python/test.py')
 			pythonTest.push(pythonData)
 
 			// End the simulation run once the time config has run the steps
-			if (timesRun == timeSet) {
-		    	
+			if (timesRun  == timeSet) {
+
+				// do one last stats update
+				totalUsers.push(skUsers)
+				totalSales.push(skSales)
+				totalRevenue.push(skRevenue)
+				totalDeposits.push(skTotalDeposited)
+				usersPerTurn.push(stepUsers)
+				salesPerTurn.push(stepSales.length)
+				revenuePerTurn.push(Math.round(stepRevenue))
+				depositsPerTurn.push(stepDeposits)
+
 		    	// Build results object for web based UI and API response
 		    	let results = {
 					totalTime: scheduler.current_time,
@@ -273,9 +304,9 @@ function runSim(config) {
 		    		ethPrice,
 					skUsers,
 					skSales,
-					skRevenue,
-					skStakes,
-					skTotalStaked,
+					skRevenue: Math.round(skRevenue).toLocaleString(),
+					skDeposits,
+					skTotalDeposited: skTotalDeposited.toLocaleString(),
 					timeLabels,
 					totalUsers,
 					usersPerTurn,
@@ -294,8 +325,8 @@ function runSim(config) {
 				console.log("Total Users: " + skUsers)
 				console.log("Total Sales: " + skSales)
 				console.log("Total Revenue: " + skRevenue)
-				console.log("Total Stakes: " + skStakes)
-				console.log("Total Staked: " + skTotalStaked)
+				console.log("Total Stakes: " + skDeposits)
+				console.log("Total Staked: " + skTotalDeposited)
 				if (pythonTest.length) {
 					console.log("Python Test: true")
 				}

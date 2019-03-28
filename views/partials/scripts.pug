@@ -3,4 +3,22 @@ script.
 		$('#run').click((e) => {
 			$('#loading').toggleClass('hidden')
 		})
+		$('#users a').click(function (e) {
+			e.preventDefault()
+			$(this).tab('show')
+		})
+		$('#sales a').click(function (e) {
+			e.preventDefault()
+			$(this).tab('show')
+		})
+		$('#revenue a').click(function (e) {
+			e.preventDefault()
+			$(this).tab('show')
+		})
+		$('#deposits a').click(function (e) {
+			e.preventDefault()
+			$(this).tab('show')
+		})
+		$("#salesTable").DataTable()
+		$("#depositsTable").DataTable()
 	})

@@ -2,7 +2,6 @@
 
 const cmc = require('../helpers/cmc')
 const binance = require('../helpers/binance')
-
 const idgen = require('../helpers/idgen')
 
 const Sale = require('../db/models/sale')

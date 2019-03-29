@@ -3,15 +3,12 @@
 const jssim = require('js-simulator')
 
 const idgen = require('../helpers/idgen')
-
 const python = require('../helpers/python')
 
 const Sale = require('../db/models/sale')
 const Vendor = require('../db/models/vendor')
 const Deposit = require('../db/models/deposit')
 const User = require('../db/models/user')
-
-const products = require('../init/seeds/products')
 
 function runSim(config) {
 	return new Promise( async (resolve, reject) => {
@@ -61,12 +58,13 @@ function runSim(config) {
 
 		// Define all the Agent models
 		// User Agent
-		let USER = function(address, initKeyBalance) {
+		let USER = function(did, address, initKeyBalance) {
 			// Rank order of operations for each increment, users 1, exchange 2, vendor 3, affiliate 4
 			let rank = 1
 			jssim.SimEvent.call(this, rank)
 			
-			this.id = address
+			this.id = did,
+			this.address = address
 			//let user = User.findOne({userId: address})
 			this.keyBalance = initKeyBalance
 			this.keyTokenBuys = []
@@ -86,12 +84,13 @@ function runSim(config) {
 		}
 
 		// SelfKey Marketplace Vendor Agent
-		let VENDOR = function(address, vendorId) {
+		let VENDOR = function(did, address, vendorId) {
 			let rank = 3
 			jssim.SimEvent.call(this, rank)
 
 			let vendor = Vendor.findOne({vendorId: vendorId})
-			this.id = address
+			this.id = did
+			this.address = address
 			this.vendorId = vendorId
 			this.keyBalance = vendor.keyBalance
 			this.mpSales = 0
@@ -150,7 +149,7 @@ function runSim(config) {
 			if (this.deposited === true && buy > (1 - BUY_RATE)) {
 				
 				// Create sale price
-				let product = products[Math.floor(Math.random() * products.length)]
+				let product = config.products[Math.floor(Math.random() * config.products.length)]
 				let price = (product.price / keyPrice)
 
 				if (this.keyBalance > price) {
@@ -170,8 +169,10 @@ function runSim(config) {
 					// Save the sale to the DB
 					Sale.create({
 						price: product.price,
+						priceKey: price,
 						sku: product.sku,
 						vendorId: product.vendorId,
+						userId: this.id,
 						turn: this.time
 					})
 				}
@@ -239,7 +240,7 @@ function runSim(config) {
 		// Seed Vendor Agents
 		const vendorSeeds = require('../init/seeds/vendors')
 		for (let vendor of vendorSeeds) {
-			let newVendor = new VENDOR(vendor.address, vendor.vendorId)
+			let newVendor = new VENDOR(idgen.did(), idgen.address())
 			scheduler.scheduleRepeatingIn(newVendor, 1)
 		}
 	
@@ -258,9 +259,8 @@ function runSim(config) {
 
 				// Track the increments
 				console.log('.')
-				console.log(timesRun)
-				console.log(timeSet)
 				timesRun++
+
 				// Update the labels array for the UI Charts etc...
 				timeLabels.push(timesRun.toString())
 				
@@ -273,7 +273,7 @@ function runSim(config) {
 						let did = idgen.did()
 						let initKeyBalance = Math.random(50,10000) * 1000000
 
-						let user = new USER(address, initKeyBalance)
+						let user = new USER(did, address, initKeyBalance)
 						
 						scheduler.scheduleRepeatingIn(user, 1)
 						
@@ -319,8 +319,6 @@ function runSim(config) {
 				// Test Python integration
 				let pythonData = await python(skUsers, './python/test.py')
 				pythonTest.push(pythonData)
-
-				console.log('here?')
 
 				// End the simulation run once the time config has run the steps
 				if (timesRun  == timeSet) {

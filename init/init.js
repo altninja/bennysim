@@ -3,12 +3,15 @@
 const cmc = require('../helpers/cmc')
 const binance = require('../helpers/binance')
 
+const idgen = require('../helpers/idgen')
+
 const Sale = require('../db/models/sale')
 const User = require('../db/models/user')
 const Deposit = require('../db/models/deposit')
 const Vendor = require('../db/models/vendor')
 
 const vendorSeeds = require('../init/seeds/vendors')
+const productSeeds = require('../init/seeds/products')
 
 async function init(config) {
 	try {
@@ -19,15 +22,28 @@ async function init(config) {
 		await User.deleteMany({})
 		await Deposit.deleteMany({})
 		
-		// Seed Vendors to DB
+		// Seed Vendors and Products
+		let products = []
 		for (let vendor of vendorSeeds) {
+			let vendorDID = idgen.did()
 			Vendor.create({
-				vendorId: vendor.vendorId,
-				address: vendor.address,
+				vendorId: vendorDID,
+				address: idgen.address(),
 				keyBalance: 0
 			})
+			// Seed Products
+			for (let product of productSeeds) {
+				if (product.sid == vendor.sid) {
+					products.push({
+						sku: product.sku,
+						vendorId: vendorDID,
+						price: product.price
+					})
+				}
+			}
 		}
-		
+		config.products = products
+
 		// Get CMC data
 		let cmcData = await cmc()
 		config.key = cmcData.key

@@ -7,6 +7,7 @@ block content
 		.col-md-12
 			h1(style='font-size: 48px;') BennySim: SelfKey Network Simulation Tool
 			hr
+
 			ul.nav.nav-tabs(role='tablist')
 				li.active(role='presentation')
 					a(href='#config', aria-controls='config', role='tab', data-toggle='tab') Setup Config
@@ -56,6 +57,12 @@ block content
 									button#run.btn.btn-success.btn-block.btn-lg(type='submit')
 										i.fa.fa-rocket
 										| &nbsp;Run Simulation
+							#loading.alert.alert-info.hidden.col-md-offset-3.col-md-6.text-center
+								h2 
+									i.fa.fa-rocket
+									| &nbsp;Running BennySim...
+								br
+								br
 
 				#scrape.tab-pane(role='tabpanel')
 					h2 Scraped Data
@@ -106,8 +113,4 @@ block content
 				
 			br
 			br
-			#loading.alert.alert-info.hidden.col-md-offset-3.col-md-6.text-center
-				h2 
-					i.fa.fa-rocket
-					| &nbsp;Running BennySim...
 

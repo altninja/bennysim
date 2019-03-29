@@ -15,10 +15,13 @@ script.
 			$(this).tab('show')
 		})
 
-		// Results Tabs
+		// Run Simulation Button
 		$('#run').click((e) => {
+			$('#run').toggleClass('hidden')
 			$('#loading').toggleClass('hidden')
 		})
+
+		// Results Tabs
 		$('#users a').click(function (e) {
 			e.preventDefault()
 			$(this).tab('show')
@@ -45,8 +48,9 @@ script.
 		})
 
 		// Results Datatables
-		$("#usersTable").DataTable()
-		$("#salesTable").DataTable()
-		$("#depositsTable").DataTable()
+		$('#usersTable').DataTable()
+		$('#salesTable').DataTable()
+		$('#depositsTable').DataTable()
+		$('#vendorsTable').DataTable()
 
 	})

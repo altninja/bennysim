@@ -1,10 +1,8 @@
 [
 	{
-		"address": 111,
-		"vendorId": 123
+		"sid": 123
 	},
 	{
-		"address": 112,
-		"vendorId": 456
+		"sid": 456
 	}
 ]

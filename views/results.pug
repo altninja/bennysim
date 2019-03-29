@@ -50,9 +50,9 @@ block content
 					table.table.table-striped#usersTable
 						thead
 							tr
-								th User ID
+								th User DID
 								th Address
-								th Key Balance
+								th KEY Balance
 								th Turn
 								th
 							tbody
@@ -82,8 +82,10 @@ block content
 						thead
 							tr
 								th Product ID
-								th Price
-								th Vendor ID
+								th Price USD
+								th Price KEY
+								th Vendor DID
+								th User DID
 								th Turn
 								th
 							tbody
@@ -94,7 +96,11 @@ block content
 										td
 											p #{sale.price}
 										td
+											p #{sale.priceKey}
+										td
 											p #{sale.vendorId}
+										td
+											p #{sale.userId}
 										td
 											p #{sale.turn}
 										td
@@ -122,7 +128,7 @@ block content
 					table.table.table-striped#depositsTable
 						thead
 							tr
-								th User ID
+								th User DID
 								th Amount
 								th Turn
 								th
@@ -147,7 +153,7 @@ block content
 					table.table.table-striped#vendorsTable
 						thead
 							tr
-								th Vendor ID
+								th Vendor DID
 								th Address
 								th KEY Balance
 								th
@@ -165,10 +171,12 @@ block content
 												| 
 												i.fa.fa-leaf
 
-				#affilates.tab-pane(role='tabpanel')
+				#affiliates.tab-pane(role='tabpanel')
 					.row
 						h2 Affiliates
 					hr
+					p Coming Soon...
+
 	script.
 		let ctx1 = document.getElementById('totalUsers').getContext('2d')
 		let ctx2 = document.getElementById('dailyUsers').getContext('2d')

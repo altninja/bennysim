@@ -7,49 +7,103 @@ block content
 		.col-md-12
 			h1(style='font-size: 48px;') BennySim: SelfKey Network Simulation Tool
 			hr
-			.row
-				.col-md-4
-					h3 KEY Price Info
-					hr
-					pre #{key.name}
-					pre #{key.rank}
-					pre #{key.price_btc}
-					pre #{key.price_usd}
-					pre #{key.market_cap_usd}
-					pre #{key.available_supply}
-					pre #{key.total_supply}
-				.col-md-4
-					h3 ETH Price Info
-					hr
-					pre #{eth.name}
-					pre #{eth.rank}
-					pre #{eth.price_btc}
-					pre #{eth.price_usd}
-					pre #{eth.market_cap_usd}
-					pre #{eth.available_supply}
-					pre #{eth.total_supply}
-				form.col-md-4(method='POST', action='/sim')
-					h3 Setup BennySim
-					hr
-					input(type='hidden', name='_csrf', value=_csrf)
-					//- input(type='hidden', name='key', value=key)
-					//- input(type='hidden', name='eth', value=eth)
-					.form-group
-						input.form-control(type='text', name='time', id='time', placeholder='Time Increments (Default 10)')
-					.form-group
-						input.form-control(type='text', name='joinRate', id='joinRate', placeholder='Join Rate (Default 25)')
-					.form-group
-						input.form-control(type='text', name='depositRate', id='depositRate', placeholder='Deposit Rate (Default 0.02)')
-					.form-group
-						input.form-control(type='text', name='revokeRate', id='revokeRate', placeholder='Revoke Rate (Default 0.80')
-					.form-group
-						input.form-control(type='text', name='buyRate', id='buyRate', placeholder='Buy Rate (Default 0.01)')
-					.form-group
-						input.form-control(type='text', name='deposit', id='deposit', placeholder='Deposit Amount (Default 10000)')
-					.form-group.text-center
-						button#run.btn.btn-success.btn-block(type='submit')
-							i.fa.fa-rocket
-							| &nbsp;Run Simulation
+			ul.nav.nav-tabs(role='tablist')
+				li.active(role='presentation')
+					a(href='#config', aria-controls='config', role='tab', data-toggle='tab') Setup Config
+				li(role='presentation')
+					a(href='#scrape', aria-controls='scrape', role='tab', data-toggle='tab') Scraped Data
+				li(role='presentation')
+					a(href='#seed', aria-controls='seed', role='tab', data-toggle='tab') Seed Data
+			
+			.tab-content
+				#config.tab-pane.active(role='tabpanel')
+					form(method='POST', action='/sim')
+						h3 Setup BennySim Config
+						hr
+						input(type='hidden', name='_csrf', value=_csrf)
+						.row
+							.col-md-4
+								h4 Basic Config
+								hr
+								.form-group
+									input.form-control(type='text', name='time', id='time', placeholder='Time Increments (Default 10)')
+								.form-group
+									input.form-control(type='text', name='deposit', id='deposit', placeholder='Deposit Amount (Default 10000)')
+							.col-md-4
+								h4 Conversion Rates
+								hr
+								.form-group
+									input.form-control(type='text', name='joinRate', id='joinRate', placeholder='Join Rate (Default 25)')
+								.form-group
+									input.form-control(type='text', name='depositRate', id='depositRate', placeholder='Deposit Rate (Default 0.02)')
+								.form-group
+									input.form-control(type='text', name='revokeRate', id='revokeRate', placeholder='Revoke Rate (Default 0.80')
+								.form-group
+									input.form-control(type='text', name='buyRate', id='buyRate', placeholder='Buy Rate (Default 0.01)')
+							.col-md-4
+								h4 Growth Rates
+								hr
+								.form-group
+									input.form-control(type='text', name='keyRate', id='keyRate', placeholder='KEY Rate (Default 0.01)')
+								.form-group
+									input.form-control(type='text', name='userGrowthRate', id='userGrowthRate', placeholder='User Growth Rate (Default 0.01)')
+								.form-group
+									input.form-control(type='text', name='salesGrowthRate', id='salesGrowthRate', placeholder='Sales Growth Rate (Default 0.01)')
+						.row
+							.col-md-offset-4.col-md-4
+								hr
+								.form-group.text-center
+									button#run.btn.btn-success.btn-block.btn-lg(type='submit')
+										i.fa.fa-rocket
+										| &nbsp;Run Simulation
+
+				#scrape.tab-pane(role='tabpanel')
+					h2 Scraped Data
+					.row
+						.col-md-4
+							h3 CMC KEY Price Info
+							hr
+							pre Name: #{key.name}
+							pre Rank: #{key.rank}
+							pre Price (BTC): #{key.price_btc}
+							pre Price (USD): #{key.price_usd}
+							pre Market Cap: #{key.market_cap_usd}
+							pre Available: #{key.available_supply}
+							pre Totale: #{key.total_supply}
+						
+						.col-md-4
+							h3 CMC ETH Price Info
+							hr
+							pre Name: #{eth.name}
+							pre Rank: #{eth.rank}
+							pre Price (BTC): #{eth.price_btc}
+							pre Price (USD): #{eth.price_usd}
+							pre Market Cap: #{eth.market_cap_usd}
+							pre Available: #{eth.available_supply}
+							pre Total: #{eth.total_supply}
+						
+						.col-md-4
+							h3 Binance KEY Order Book
+							hr
+							pre KEY/ETH Asks: #{keyEth.asks.length}
+							pre KEY/ETH Bids: #{keyEth.bids.length}
+							pre KEY/BTC Asks: #{keyBtc.asks.length}
+							pre KEY/BTC Bids: #{keyBtc.bids.length}
+
+				#seed.tab-pane(role='tabpanel')
+					h2 Seed Data
+					.row
+						.col-md-6
+							h3 Vendor Seeds
+							hr
+							for vendor in vendors
+								pre #{JSON.stringify(vendor)}
+						.col-md-6
+							h3 Product Seeds
+							hr
+							for product in products
+								pre #{JSON.stringify(product)}
+				
 			br
 			br
 			#loading.alert.alert-info.hidden.col-md-offset-3.col-md-6.text-center

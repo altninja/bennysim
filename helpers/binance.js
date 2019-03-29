@@ -3,8 +3,8 @@
 const request = require('request-promise-native')
 
 async function binance() {
- 	let keyEth = await request('https://api.binance.com/api/v1/depth?symbol=KEYETH')
-	let keyBtc = await request('https://api.binance.com/api/v1/depth?symbol=KEYBTC')
+ 	let keyEth = await request('https://api.binance.com/api/v1/depth?symbol=KEYETH&limit=1000')
+	let keyBtc = await request('https://api.binance.com/api/v1/depth?symbol=KEYBTC&limit=1000')
 	let data = {
 		keyEth: JSON.parse(keyEth),
 		keyBtc: JSON.parse(keyBtc)

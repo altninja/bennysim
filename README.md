@@ -81,6 +81,26 @@ Git Clone
 
 ## Resources
 
+## TDL
+
+// INIT TDL
+// Improved Seed Users
+// - Scrape all KEY token holders
+
+// Improved Seed Vendors
+// - Flag Theory
+// - Crypto Exchanges
+// - Other Vendors
+
+// Improved Seed Products (More accurate data)
+// - Incorporations
+// - Bank Accounts
+// - Notaries
+// - Translations
+// - Accountants
+
+// Improved Seed Exchange
+// - Format exchange order book and seed DB for Agents to execute realistic orders
 
 ## Contributing
 

@@ -2,10 +2,10 @@
 
 const jssim = require('js-simulator')
 
-const uuid = require('uuid/v4')
-const hexId = require('uuid-to-hex')
+const idgen = require('../helpers/idgen')
 
 const python = require('../helpers/python')
+
 const Sale = require('../db/models/sale')
 const Vendor = require('../db/models/vendor')
 const Deposit = require('../db/models/deposit')
@@ -61,14 +61,14 @@ function runSim(config) {
 
 		// Define all the Agent models
 		// User Agent
-		let USER = function(address) {
+		let USER = function(address, initKeyBalance) {
 			// Rank order of operations for each increment, users 1, exchange 2, vendor 3, affiliate 4
 			let rank = 1
 			jssim.SimEvent.call(this, rank)
 			
 			this.id = address
 			//let user = User.findOne({userId: address})
-			this.keyBalance = Math.random(50,10000) * 1000000
+			this.keyBalance = initKeyBalance
 			this.keyTokenBuys = []
 			this.keyTokenSells = []
 			this.ethBalance = 0
@@ -151,28 +151,30 @@ function runSim(config) {
 				
 				// Create sale price
 				let product = products[Math.floor(Math.random() * products.length)]
-				let price = (product.price / keyPrice * 100)
+				let price = (product.price / keyPrice)
 
-				// Update user KEY balance
-				this.keyBalance = this.keyBalance - price
-				await User.updateOne({address: this.id},{keyBalance: this.keyBalance})
-				
-				// Update vendor KEY balance
-				let stateVendor = await Vendor.findOne({vendorId: product.vendorId})
-				await Vendor.updateOne({vendorId: product.vendorId},{keyBalance: (stateVendor.keyBalance + price)})
+				if (this.keyBalance > price) {
 
-				// Update SelfKey Sales and Revenue
-				skSales++
-				skRevenue = skRevenue + price
+					// Update user KEY balance
+					this.keyBalance = this.keyBalance - price
+					await User.updateOne({address: this.id},{keyBalance: this.keyBalance})
+					
+					// Update vendor KEY balance
+					let stateVendor = await Vendor.findOne({vendorId: product.vendorId})
+					await Vendor.updateOne({vendorId: product.vendorId},{keyBalance: (stateVendor.keyBalance + price)})
 
-				// Save the sale to the DB
-				Sale.create({
-					price: product.price,
-					sku: product.sku,
-					vendorId: product.vendorId,
-					turn: this.time
-				})
+					// Update SelfKey Sales and Revenue
+					skSales++
+					skRevenue = skRevenue + price
 
+					// Save the sale to the DB
+					Sale.create({
+						price: product.price,
+						sku: product.sku,
+						vendorId: product.vendorId,
+						turn: this.time
+					})
+				}
 			}
 
 			// de-increment timelock
@@ -188,6 +190,8 @@ function runSim(config) {
 				this.deposited = false
 				skDeposits = skDeposits - 1
 			}
+
+			User.updateOne({address: this.id},{keyBalance: this.keyBalance})
 			return
 		}
 
@@ -208,7 +212,13 @@ function runSim(config) {
 
 		// Affiliate Agent Logic
 		AFFILIATE.prototype.update = async function(deltaTime) {
-			
+			// User and affiliate agents the same just change status?
+			// 0.5% chance a user joins the affiliate program each turn
+			// Affiliates add an additional 1-3 new users each increment and are associated by ID (user growth)
+			// New users from affiliates have a higher chance of making a sale (increase sales)
+			// Those users will split commissions to the affiliate 
+			// Make sure funds are transferred to/from wallet balances
+			// Affiliate commissions in escrow
 			return
 		}
 
@@ -239,120 +249,135 @@ function runSim(config) {
 		
 		let interval = setInterval( async () => { 
 			
-			// Setup increment tracking variables
-			let stepUsers = 0
-			let stepSales = 0
-			let stepRevenue = 0
-			let stepDeposits = 0
+			try {
+				// Setup increment tracking variables
+				let stepUsers = 0
+				let stepSales = 0
+				let stepRevenue = 0
+				let stepDeposits = 0
 
-			// Track the increments
-			console.log('.')
-			timesRun++
-			// Update the labels array for the UI Charts etc...
-			timeLabels.push(timesRun.toString())
-			
-			// New Users join the network (download the wallet)
-			// uses JOIN_RATE global constant for how many users joining per day
-			for (let i = 0; i < 100; i++) {
-				if ((Math.random()*100) > JOIN_RATE) {
+				// Track the increments
+				console.log('.')
+				console.log(timesRun)
+				console.log(timeSet)
+				timesRun++
+				// Update the labels array for the UI Charts etc...
+				timeLabels.push(timesRun.toString())
+				
+				// New Users join the network (download the wallet)
+				// uses JOIN_RATE global constant for how many users joining per day
+				for (let i = 0; i < 100; i++) {
+					if ((Math.random()*100) > JOIN_RATE) {
 
-					let address = new String('0x' + hexId(uuid()))
-					let user = new USER(address)
-					scheduler.scheduleRepeatingIn(user, 1)
-					skUsers++
-					stepUsers++
-					User.create({
-						userId: address,
-						address: address,
-						keyBalance: 0,
-						turn: timesRun
-					})
+						let address = idgen.address()
+						let did = idgen.did()
+						let initKeyBalance = Math.random(50,10000) * 1000000
+
+						let user = new USER(address, initKeyBalance)
+						
+						scheduler.scheduleRepeatingIn(user, 1)
+						
+						skUsers++
+						stepUsers++
+						
+						User.create({
+							userId: did,
+							address: address,
+							keyBalance: initKeyBalance,
+							turn: timesRun
+						})
+					}
 				}
-			}
 
-			// Run the update function for all the Agents
-			scheduler.update()
+				// Run the update function for all the Agents
+				scheduler.update()
 
-			// Get the sales total for the turn
-			stepSales = await Sale.find({turn: scheduler.current_time})
-			for (let sale of stepSales) {
-				stepRevenue = stepRevenue + sale.price
-			}
+				// Get the sales total for the turn
+				stepSales = await Sale.find({turn: scheduler.current_time})
+				for (let sale of stepSales) {
+					stepRevenue = stepRevenue + sale.price
+				}
 
-			// Get the deposit total for the turn
-			let allDeposits = await Deposit.find({turn: scheduler.current_time})
-			for (let deposit of allDeposits) {
-				stepDeposits = stepDeposits + deposit.deposit
-			}
+				// Get the deposit total for the turn
+				let allDeposits = await Deposit.find({turn: scheduler.current_time})
+				for (let deposit of allDeposits) {
+					stepDeposits = stepDeposits + deposit.deposit
+				}
 
-			// Update cummulative data for charts
-			totalUsers.push(skUsers)
-			totalSales.push(skSales)
-			totalRevenue.push(Math.round(skRevenue))
-			totalDeposits.push(Math.round(skTotalDeposited))
-
-			// Update increment data for charts
-			usersPerTurn.push(stepUsers)
-			salesPerTurn.push(stepSales.length)
-			revenuePerTurn.push(Math.round(stepRevenue))
-			depositsPerTurn.push(Math.round(stepDeposits))
-
-			// Test Python integration
-			let pythonData = await python(skUsers, './python/test.py')
-			pythonTest.push(pythonData)
-
-			// End the simulation run once the time config has run the steps
-			if (timesRun  == timeSet) {
-				console.log('NEVER?')
-				// do one last stats update
+				// Update cummulative data for charts
 				totalUsers.push(skUsers)
 				totalSales.push(skSales)
-				totalRevenue.push(skRevenue)
-				totalDeposits.push(skTotalDeposited)
+				totalRevenue.push(Math.round(skRevenue))
+				totalDeposits.push(Math.round(skTotalDeposited))
+
+				// Update increment data for charts
 				usersPerTurn.push(stepUsers)
 				salesPerTurn.push(stepSales.length)
 				revenuePerTurn.push(Math.round(stepRevenue))
-				depositsPerTurn.push(stepDeposits)
+				depositsPerTurn.push(Math.round(stepDeposits))
 
-		    	// Build results object for web based UI and API response
-		    	let results = {
-					totalTime: scheduler.current_time,
-		    		keyPrice,
-		    		ethPrice,
-					skUsers,
-					skSales,
-					skRevenue: Math.round(skRevenue).toLocaleString(),
-					skDeposits,
-					skTotalDeposited: skTotalDeposited.toLocaleString(),
-					timeLabels,
-					totalUsers,
-					usersPerTurn,
-					totalSales,
-					salesPerTurn,
-					totalRevenue,
-					revenuePerTurn,
-					totalDeposits,
-					depositsPerTurn
-		    	}
+				// Test Python integration
+				let pythonData = await python(skUsers, './python/test.py')
+				pythonTest.push(pythonData)
 
-				// Output the final results to console
-				console.log('END SIM')
-		    	console.log('******************************')
-				console.log("Elapsed Time: " + scheduler.current_time)
-				console.log("Total Users: " + skUsers)
-				console.log("Total Sales: " + skSales)
-				console.log("Total Revenue: " + skRevenue)
-				console.log("Total Stakes: " + skDeposits)
-				console.log("Total Staked: " + skTotalDeposited)
-				if (pythonTest.length) {
-					console.log("Python Test: true")
-				}
+				console.log('here?')
 
-				// clear out the simulation data
-		        clearInterval(interval)
+				// End the simulation run once the time config has run the steps
+				if (timesRun  == timeSet) {
 
-		       	// return the results object to the sim controller 
-		        resolve(results)
+					// do one last stats update
+					totalUsers.push(skUsers)
+					totalSales.push(skSales)
+					totalRevenue.push(skRevenue)
+					totalDeposits.push(skTotalDeposited)
+					usersPerTurn.push(stepUsers)
+					salesPerTurn.push(stepSales.length)
+					revenuePerTurn.push(Math.round(stepRevenue))
+					depositsPerTurn.push(stepDeposits)
+
+			    	// Build results object for web based UI and API response
+			    	let results = {
+						totalTime: scheduler.current_time,
+			    		keyPrice,
+			    		ethPrice,
+						skUsers,
+						skSales,
+						skRevenue: Math.round(skRevenue).toLocaleString(),
+						skDeposits,
+						skTotalDeposited: skTotalDeposited.toLocaleString(),
+						timeLabels,
+						totalUsers,
+						usersPerTurn,
+						totalSales,
+						salesPerTurn,
+						totalRevenue,
+						revenuePerTurn,
+						totalDeposits,
+						depositsPerTurn
+			    	}
+
+					// Output the final results to console
+					console.log('END SIM')
+			    	console.log('******************************')
+					console.log("Elapsed Time: " + scheduler.current_time)
+					console.log("Total Users: " + skUsers)
+					console.log("Total Sales: " + skSales)
+					console.log("Total Revenue: " + skRevenue)
+					console.log("Total Stakes: " + skDeposits)
+					console.log("Total Staked: " + skTotalDeposited)
+					if (pythonTest.length) {
+						console.log("Python Test: true")
+					}
+
+					// clear out the simulation data
+			        clearInterval(interval)
+
+			       	// return the results object to the sim controller 
+			        resolve(results)
+			    }
+			} catch (e) {
+				console.log(e)
+				reject(e)
 		    }
 
 		}, 100)

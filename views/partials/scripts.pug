@@ -1,5 +1,21 @@
 script.
 	$(document).ready(() => {
+		
+		// Setup Tabs
+		$('#config a').click(function (e) {
+			e.preventDefault()
+			$(this).tab('show')
+		})
+		$('#scrape a').click(function (e) {
+			e.preventDefault()
+			$(this).tab('show')
+		})
+		$('#seed a').click(function (e) {
+			e.preventDefault()
+			$(this).tab('show')
+		})
+
+		// Results Tabs
 		$('#run').click((e) => {
 			$('#loading').toggleClass('hidden')
 		})
@@ -19,7 +35,18 @@ script.
 			e.preventDefault()
 			$(this).tab('show')
 		})
+		$('#vendors a').click(function (e) {
+			e.preventDefault()
+			$(this).tab('show')
+		})
+		$('#affiliates a').click(function (e) {
+			e.preventDefault()
+			$(this).tab('show')
+		})
+
+		// Results Datatables
 		$("#usersTable").DataTable()
 		$("#salesTable").DataTable()
 		$("#depositsTable").DataTable()
+
 	})

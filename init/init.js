@@ -1,29 +1,3 @@
-// INIT
-
-// Seed Users
-// - Scrape all KEY token holders
-// - Wallet download stats
-
-// Seed Vendors
-// - Flag theory
-// - Crypto Exchanges
-
-// Seed Products
-// - Incorporations
-// - Bank Accounts
-// - Notaries
-// - Translations
-// - Accountants
-
-// Seed Exchange
-// - Binance Order Book (Buy/Sell)
-
-// Get CMC data
-
-// Get Config form (req.body)
-
-// format config objet for main sim 
-
 'use strict'
 
 const cmc = require('../helpers/cmc')

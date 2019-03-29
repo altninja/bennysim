@@ -26,13 +26,17 @@ block content
 		.col-md-12
 			ul.nav.nav-tabs(role='tablist')
 				li.active(role='presentation')
-					a(href='#users', aria-controls='home', role='tab', data-toggle='tab') Users
+					a(href='#users', aria-controls='users', role='tab', data-toggle='tab') Users
 				li(role='presentation')
-					a(href='#sales', aria-controls='profile', role='tab', data-toggle='tab') Sales
+					a(href='#sales', aria-controls='sales', role='tab', data-toggle='tab') Sales
 				li(role='presentation')
-					a(href='#revenue', aria-controls='messages', role='tab', data-toggle='tab') Revenue
+					a(href='#revenue', aria-controls='revenue', role='tab', data-toggle='tab') Revenue
 				li(role='presentation')
-					a(href='#deposits', aria-controls='settings', role='tab', data-toggle='tab') Deposits
+					a(href='#deposits', aria-controls='deposits', role='tab', data-toggle='tab') Deposits
+				li(role='presentation')
+					a(href='#vendors', aria-controls='vendors', role='tab', data-toggle='tab') Vendors
+				li(role='presentation')
+					a(href='#affiliates', aria-controls='affiliates', role='tab', data-toggle='tab') Affiliates
 			
 			.tab-content
 				#users.tab-pane.active(role='tabpanel')
@@ -135,6 +139,36 @@ block content
 											a.btn.btn-xs.btn-info(href='#')
 												| 
 												i.fa.fa-leaf
+
+				#vendors.tab-pane(role='tabpanel')
+					.row
+						h2 Vendors
+					hr
+					table.table.table-striped#vendorsTable
+						thead
+							tr
+								th Vendor ID
+								th Address
+								th KEY Balance
+								th
+							tbody
+								for vendor in vendors
+									tr
+										td
+											p #{vendor.vendorId}
+										td
+											p #{vendor.address}
+										td
+											p #{vendor.keyBalance}
+										td
+											a.btn.btn-xs.btn-info(href='#')
+												| 
+												i.fa.fa-leaf
+
+				#affilates.tab-pane(role='tabpanel')
+					.row
+						h2 Affiliates
+					hr
 	script.
 		let ctx1 = document.getElementById('totalUsers').getContext('2d')
 		let ctx2 = document.getElementById('dailyUsers').getContext('2d')

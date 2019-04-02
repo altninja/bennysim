@@ -169,8 +169,17 @@ Binance API
 // Improved Seed Exchange
 // - Format exchange order book and seed DB for Agents to execute realistic orders
 
+Random TDL
+- [ ] USD/BTC/ETH/KEY Balances for all agents
+
+Priority 1 - Trading Sim
+- [ ] User starts with Random Balance of USD/KEY/ETH/BTC
+- [ ] User must BUY KEY from EXCHANGE if they want to DEPOSIT or BUY MP Item
+- [ ] VENDORS and AFFILIATES will SELL KEY for BTC/ETH on EXCHANGE
+- [ ] VENDORS and AFFILIATE will SELL BTC/ETH for USD
+- [ ] Basic KEY PRICE Thresholds for BUY/SELL/HOLD Agent Logic
+
 Priority 2 - Affiliate Sim
-- [ ] User and affiliate agents the same just change status?
 - [ ] 0.5% chance a user joins the affiliate program each turn
 - [ ] Affiliates add an additional 1-3 new users each increment and are associated by ID (user growth)
 - [ ] New users from affiliates have a higher chance of making a sale (increase sales)
@@ -183,8 +192,15 @@ Priority 3 - Fluctuations and Growth Rate Curves
 - [ ] Sales conversions curve
 - [ ] User signup curve
 
+Priority 4 - Certifiers Sim
+- [ ] Seed genesis group of certifiers
+- [ ] 0.1% chance new certifier each turn
+- [ ] Product prices between $25 and $100
+- [ ] Sales go to affiliate
+- [ ] KEY deposit for interaction?
+- [ ] Escrow?
 
-Priority 4 - Improvements / Nice To Have
+Priority 5 - Improvements / Nice To Have
 - [ ] KEY as an agent model
 - [ ] ESCROW and DEPOSIT as agent models?
 - [ ] Split main sim file into smaller files

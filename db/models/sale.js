@@ -5,11 +5,13 @@ const Schema = mongoose.Schema
 
 const saleSchema = new mongoose.Schema({
 
+	transactionId: String,
     price: Number,
     priceKey: Number,
     sku: String,
     vendorId: String,
     userId: String,
+    affiliateId: String,
     turn: Number
 
 }, { timestamps: true })

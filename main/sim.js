@@ -10,6 +10,7 @@ const Vendor = require('../db/models/vendor')
 const Deposit = require('../db/models/deposit')
 const User = require('../db/models/user')
 const Turn = require('../db/models/turn')
+const Affiliate = require('../db/models/affiliate')
 
 function runSim(config) {
 	return new Promise( async (resolve, reject) => {
@@ -17,6 +18,7 @@ function runSim(config) {
 		// User defined config from setup form
 		const timeSet = config.time || 10
 		const JOIN_RATE = config.joinRate || 25
+		const AFFILIATE_JOIN_RATE = 1
 		const DEPOSIT_RATE = config.joinRate || 0.2
 		const REVOKE_RATE = config.revokeRate || 0.80
 		const BUY_RATE = config.buyRate || 0.05
@@ -98,7 +100,7 @@ function runSim(config) {
 		}
 
 		// Affiliate Agent
-		let AFFILIATE = function(address, affiliateId) {
+		let AFFILIATE = function(did, address, keyBalance) {
 			let rank = 4
 			jssim.SimEvent.call(this, rank)
 			
@@ -169,6 +171,7 @@ function runSim(config) {
 
 					// Save the sale to the DB
 					Sale.create({
+						transactionId: idgen.transaction(),
 						price: product.price,
 						priceKey: price,
 						sku: product.sku,
@@ -214,8 +217,6 @@ function runSim(config) {
 
 		// Affiliate Agent Logic
 		AFFILIATE.prototype.update = async function(deltaTime) {
-			// User and affiliate agents the same just change status?
-			// 0.5% chance a user joins the affiliate program each turn
 			// Affiliates add an additional 1-3 new users each increment and are associated by ID (user growth)
 			// New users from affiliates have a higher chance of making a sale (increase sales)
 			// Those users will split commissions to the affiliate 
@@ -272,7 +273,7 @@ function runSim(config) {
 
 						let address = idgen.address()
 						let did = idgen.did()
-						let initKeyBalance = Math.random(50,10000) * 1000000
+						let initKeyBalance = Math.random(50,10000) * 10000000
 
 						let user = new USER(did, address, initKeyBalance)
 						
@@ -282,6 +283,32 @@ function runSim(config) {
 						stepUsers++
 						
 						User.create({
+							userId: did,
+							address: address,
+							keyBalance: initKeyBalance,
+							turn: timesRun
+						})
+					}
+				}
+
+				// 0.5% chance a user joins the affiliate program each turn
+				// New Affiilates join the network
+				// uses AFFILIATE_JOIN_RATE global constant for how many affiliates joining per day
+				for (let i = 0; i < 100; i++) {
+					if ((Math.random()*100) > AFFILIATE_JOIN_RATE) {
+
+						let address = idgen.address()
+						let did = idgen.did()
+						let initKeyBalance = Math.random(50,10000) * 10000000
+
+						let affiliate = new AFFILIATE(did, address, initKeyBalance)
+						
+						scheduler.scheduleRepeatingIn(affiliate, 1)
+						
+						skUsers++
+						stepUsers++
+						
+						Affiliate.create({
 							userId: did,
 							address: address,
 							keyBalance: initKeyBalance,

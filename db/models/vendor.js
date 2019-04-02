@@ -6,8 +6,11 @@ const Schema = mongoose.Schema
 const vendorSchema = new mongoose.Schema({
 
     vendorId: String,
+    address: String,
     keyBalance: Number,
-    address: String
+    usdBalance: Number,
+    btcBalance: Number,
+    ethBalance: Number
 
 }, { timestamps: true })
 

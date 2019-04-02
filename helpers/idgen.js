@@ -15,8 +15,13 @@ function did() {
 	return 'did:key:' + hash
 }
 
+function transaction() {
+	return '0x' + hexId(uuid()) + hexId(uuid())
+}
+
 module.exports = {
 	address,
-	did
+	did,
+	transaction
 }
 

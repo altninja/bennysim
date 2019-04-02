@@ -238,9 +238,9 @@ function runSim(config) {
 		// }
 
 		// Seed Vendor Agents
-		const vendorSeeds = require('../init/seeds/vendors')
+		const vendorSeeds = await Vendor.find({})
 		for (let vendor of vendorSeeds) {
-			let newVendor = new VENDOR(idgen.did(), idgen.address())
+			let newVendor = new VENDOR(vendor.vendorId, vendor.address)
 			scheduler.scheduleRepeatingIn(newVendor, 1)
 		}
 	
@@ -304,6 +304,8 @@ function runSim(config) {
 					stepDeposits = stepDeposits + deposit.deposit
 				}
 
+				// Add to Turn model
+
 				// Update cummulative data for charts
 				totalUsers.push(skUsers)
 				totalSales.push(skSales)
@@ -322,6 +324,8 @@ function runSim(config) {
 
 				// End the simulation run once the time config has run the steps
 				if (timesRun  == timeSet) {
+
+					// Change all this to add new entry to Turn model
 
 					// do one last stats update
 					totalUsers.push(skUsers)

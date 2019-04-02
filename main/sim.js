@@ -9,6 +9,7 @@ const Sale = require('../db/models/sale')
 const Vendor = require('../db/models/vendor')
 const Deposit = require('../db/models/deposit')
 const User = require('../db/models/user')
+const Turn = require('../db/models/turn')
 
 function runSim(config) {
 	return new Promise( async (resolve, reject) => {
@@ -322,6 +323,26 @@ function runSim(config) {
 				let pythonData = await python(skUsers, './python/test.py')
 				pythonTest.push(pythonData)
 
+				Turn.create({
+					totalTime: scheduler.current_time,
+		    		keyPrice,
+		    		ethPrice,
+					skUsers,
+					skSales,
+					skRevenue,
+					skDeposits,
+					skTotalDeposited,
+					timeLabels,
+					totalUsers,
+					usersPerTurn,
+					totalSales,
+					salesPerTurn,
+					totalRevenue,
+					revenuePerTurn,
+					totalDeposits,
+					depositsPerTurn
+		    	})
+
 				// End the simulation run once the time config has run the steps
 				if (timesRun  == timeSet) {
 
@@ -344,9 +365,9 @@ function runSim(config) {
 			    		ethPrice,
 						skUsers,
 						skSales,
-						skRevenue: Math.round(skRevenue).toLocaleString(),
+						skRevenue,
 						skDeposits,
-						skTotalDeposited: skTotalDeposited.toLocaleString(),
+						skTotalDeposited,
 						timeLabels,
 						totalUsers,
 						usersPerTurn,
@@ -357,6 +378,8 @@ function runSim(config) {
 						totalDeposits,
 						depositsPerTurn
 			    	}
+
+			    	Turn.create(results)
 
 					// Output the final results to console
 					console.log('END SIM')

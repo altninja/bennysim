@@ -8,6 +8,7 @@ const Sale = require('../db/models/sale')
 const User = require('../db/models/user')
 const Deposit = require('../db/models/deposit')
 const Vendor = require('../db/models/vendor')
+const Turn = require('../db/models/turn')
 
 const vendorSeeds = require('../init/seeds/vendors')
 const productSeeds = require('../init/seeds/products')
@@ -20,7 +21,8 @@ async function init(config) {
 		await Sale.deleteMany({})
 		await User.deleteMany({})
 		await Deposit.deleteMany({})
-		
+		await Turn.deleteMany({})
+
 		// Seed Vendors and Products
 		let products = []
 		for (let vendor of vendorSeeds) {

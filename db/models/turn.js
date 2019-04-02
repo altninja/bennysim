@@ -13,15 +13,15 @@ const turnSchema = new mongoose.Schema({
 	skRevenue: Number,
 	skDeposits: Number,
 	skTotalDeposited: Number,
-	timeLabels: Number,
-	totalUsers: Number,
-	usersPerTurn: Number,
-	totalSales: Number,
-	salesPerTurn: Number,
-	totalRevenue: Number,
-	revenuePerTurn: Number,
-	totalDeposits: Number,
-	depositsPerTurn: Number
+	timeLabels: Array,
+	totalUsers: Array,
+	usersPerTurn: Array,
+	totalSales: Array,
+	salesPerTurn: Array,
+	totalRevenue: Array,
+	revenuePerTurn: Array,
+	totalDeposits: Array,
+	depositsPerTurn: Array
 
 }, { timestamps: true })
 

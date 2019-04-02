@@ -7,10 +7,7 @@ async function binance() {
 		let keyEth = await request('https://api.binance.com/api/v1/depth?symbol=KEYETH&limit=1000')
 		let keyBtc = await request('https://api.binance.com/api/v1/depth?symbol=KEYBTC&limit=1000')
 
-		// Sum total of orderbook
-
 		// KEY ETH
-
 		keyEth = JSON.parse(keyEth)
 
 		let [keyEthAsks, keyEthBids, keyEthAskPrice, keyEthBidPrice] = [0,0,0,0]
@@ -31,7 +28,6 @@ async function binance() {
 
 
 		// KEY BTC
-
 		keyBtc = JSON.parse(keyBtc)
 
 		let [keyBtcAsks, keyBtcBids, keyBtcAskPrice, keyBtcBidPrice] = [0,0,0,0]
@@ -50,7 +46,6 @@ async function binance() {
 		let keyBtcBidPriceAverage = keyBtcBidPrice / keyBtc.bids.length
 
 		// Response data
-
 		let data = {
 			keyEth: keyEth,
 			keyBtc: keyBtc,
@@ -69,7 +64,7 @@ async function binance() {
 		}
 
 		return data
-		
+
 	} catch (e) {
 		console.log(e)
 		return e
@@ -77,7 +72,6 @@ async function binance() {
 }
 
 module.exports = binance
-
 
 // parse binance data
 // primary objective - get total amount of KEY tied up in orders

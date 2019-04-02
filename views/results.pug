@@ -17,10 +17,10 @@ block content
 					h2 #{results.skSales} Sales
 				.col-md-4.well(style="margin-right: 10px; background: rgb(29, 209, 161);")
 					h2 Revenue
-					h2 #{results.skRevenue} KEY
+					h2 #{Math.round(results.skRevenue).toLocaleString()} KEY
 				.col-md-3.well(style="background: rgb(255, 159, 67);")
 					h2 Deposits
-					h2 #{results.skTotalDeposited} KEY
+					h2 #{results.skTotalDeposited.toLocaleString()} KEY
 		
 	.row
 		.col-md-12

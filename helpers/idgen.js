@@ -12,7 +12,7 @@ function address() {
 function did() {
 	let newAddress = address()
 	let hash = crypto.createHash('md5').update(newAddress.toString()).digest('hex')
-	return 'did:key:' + hash
+	return 'did:selfkey:' + hash
 }
 
 function transaction() {

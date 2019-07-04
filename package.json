@@ -37,6 +37,7 @@
     "python-shell": "^1.0.7",
     "request": "^2.88.0",
     "request-promise-native": "^1.0.7",
+    "talib": "^1.1.2",
     "uuid": "^3.3.2",
     "uuid-to-hex": "^1.0.3"
   },

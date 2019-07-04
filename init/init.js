@@ -8,16 +8,19 @@ const Sale = require('../db/models/sale')
 const User = require('../db/models/user')
 const Deposit = require('../db/models/deposit')
 const Vendor = require('../db/models/vendor')
+const Affiliate = require('../db/models/affiliate')
 const Turn = require('../db/models/turn')
 
 const vendorSeeds = require('../init/seeds/vendors')
 const productSeeds = require('../init/seeds/products')
 
 async function init(config) {
+	
 	try {
 		
 		// Clear DB
 		await Vendor.deleteMany({})
+		await Affiliate.deleteMany({})
 		await Sale.deleteMany({})
 		await User.deleteMany({})
 		await Deposit.deleteMany({})
@@ -25,6 +28,7 @@ async function init(config) {
 
 		// Seed Vendors and Products
 		let products = []
+		
 		for (let vendor of vendorSeeds) {
 			let vendorDID = idgen.did()
 			Vendor.create({
@@ -43,6 +47,7 @@ async function init(config) {
 				}
 			}
 		}
+		
 		config.products = products
 
 		// Get CMC data
@@ -55,8 +60,11 @@ async function init(config) {
 
 		// Return config object for main sim
 		return config
+
 	} catch (e) {
+
 		return {error: true}
+
 	}
 }
 

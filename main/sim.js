@@ -4,7 +4,7 @@ const jssim = require('js-simulator')
 
 const idgen = require('../helpers/idgen')
 const python = require('../helpers/python')
-const talib = require('talib')
+// const talib = require('talib')
 
 const Sale = require('../db/models/sale')
 const Vendor = require('../db/models/vendor')
@@ -12,6 +12,8 @@ const Deposit = require('../db/models/deposit')
 const User = require('../db/models/user')
 const Turn = require('../db/models/turn')
 const Affiliate = require('../db/models/affiliate')
+const Claim = require('../db/models/claim')
+const Certifier = require('../db/models/certifier')
 
 function runSim(config) {
 	return new Promise( async (resolve, reject) => {
@@ -107,39 +109,37 @@ function runSim(config) {
 				this.mpSales = 0
 			}
 
-			// // Affiliate Agent
-			// let AFFILIATE = function(did, address, keyBalance) {
-			// 	let rank = 4
-			// 	jssim.SimEvent.call(this, rank)
+			// Affiliate Agent
+			let AFFILIATE = function(did, address, keyBalance) {
+				let rank = 4
+				jssim.SimEvent.call(this, rank)
 				
-			// 	// gets split payment commissions
-			// }
+				// gets split payment commissions
+			}
 
-			// // Certifier Agent
-			// let CERTIFIER = function(did, address, keyBalance) {
-			// 	let rank = 5
-			// 	jssim.SimEvent.call(this, rank)
+			// Certifier Agent
+			let CERTIFIER = function(did, address, keyBalance) {
+				let rank = 5
+				jssim.SimEvent.call(this, rank)
 				
-			// 	// certifier logic here
-			// }
+				// certifier logic here
+			}
 
-			// // Relying Party Agent
-			// let INTEGRATOR = function(did, address, keyBalance) {
-			// 	let rank = 6
-			// 	jssim.SimEvent.call(this, rank)
+			// Relying Party Agent
+			let INTEGRATOR = function(did, address, keyBalance) {
+				let rank = 6
+				jssim.SimEvent.call(this, rank)
 				
-			// 	// integrator logic here
-			// }
+				// integrator logic here
+			}
 
 			// Add the models to JS Sim
 			USER.prototype = Object.create(jssim.SimEvent)
 			EXCHANGE.prototype = Object.create(jssim.SimEvent)
 			VENDOR.prototype = Object.create(jssim.SimEvent)
-			// AFFILIATE.prototype = Object.create(jssim.SimEvent)
-			// CERTIFIER.prototype = Object.create(jssim.SimEvent)
-			// INTEGRATOR.prototype = Object.create(jssim.SimEvent)
-
-
+			AFFILIATE.prototype = Object.create(jssim.SimEvent)
+			CERTIFIER.prototype = Object.create(jssim.SimEvent)
+			INTEGRATOR.prototype = Object.create(jssim.SimEvent)
 			
 			// Agent Logic to be executed on each time increment
 			// User Agent Logic
@@ -244,14 +244,39 @@ function runSim(config) {
 			}
 
 			// // Affiliate Agent Logic
-			// AFFILIATE.prototype.update = async function(deltaTime) {
-			// 	// Affiliates add an additional 1-3 new users each increment and are associated by ID (user growth)
-			// 	// New users from affiliates have a higher chance of making a sale (increase sales)
-			// 	// Those users will split commissions to the affiliate 
-			// 	// Make sure funds are transferred to/from wallet balances
-			// 	// Affiliate commissions in escrow
-			// 	return
-			// }
+			AFFILIATE.prototype.update = async function(deltaTime) {
+				// Affiliates add an additional potential 2 new users each increment and are associated by ID (user growth)
+	// 				for (let i = 0; i < 2; i++) {
+	// console.log('322')
+	// 					if ((Math.random()*100) > JOIN_RATE) {
+
+	// 						let address = idgen.address()
+	// 						let did = idgen.did()
+	// 						let initKeyBalance = Math.random(50,10000) * 10000000
+
+	// 						// let user = new USER(did, address, initKeyBalance)
+							
+	// 						// scheduler.scheduleRepeatingIn(user, 1)
+							
+	// 						// skUsers++
+	// 						// stepUsers++
+							
+	// 						User.create({
+	// 							userId: did,
+	// 							address: address,
+	// 							keyBalance: initKeyBalance,
+	// 							turn: timesRun,
+	// 							affiliateId: did
+	// 						})
+	// console.log('333')
+
+	// 					}
+	// 				}
+	// 			// New users from affiliates have a higher chance of making a sale (increase sales)
+				// Those users will split commissions to the affiliate 
+				// Make sure funds are transferred to/from wallet balances
+				return
+			}
 
 
 			// Initiate the JS Sim scheduler that runs the increments and executes the agent logic
@@ -324,28 +349,28 @@ function runSim(config) {
 					// 0.5% chance a user joins the affiliate program each turn
 					// New Affiilates join the network
 					// uses AFFILIATE_JOIN_RATE global constant for how many affiliates joining per day
-					// for (let i = 0; i < 100; i++) {
-					// 	if ((Math.random()*100) > AFFILIATE_JOIN_RATE) {
+					for (let i = 0; i < 10; i++) {
+						if ((Math.random()*100) > AFFILIATE_JOIN_RATE) {
 
-					// 		let address = idgen.address()
-					// 		let did = idgen.did()
-					// 		let initKeyBalance = Math.random(50,10000) * 10000000
+							let address = idgen.address()
+							let did = idgen.did()
+							let initKeyBalance = Math.random(50,10000) * 10000000
 
-					// 		let affiliate = new AFFILIATE(did, address, initKeyBalance)
+							let affiliate = new AFFILIATE(did, address, initKeyBalance)
 							
-					// 		scheduler.scheduleRepeatingIn(affiliate, 1)
+							scheduler.scheduleRepeatingIn(affiliate, 1)
 							
-					// 		skUsers++
-					// 		stepUsers++
+							skUsers++
+							stepUsers++
 							
-					// 		Affiliate.create({
-					// 			userId: did,
-					// 			address: address,
-					// 			keyBalance: initKeyBalance,
-					// 			turn: timesRun
-					// 		})
-					// 	}
-					// }
+							Affiliate.create({
+								userId: did,
+								address: address,
+								keyBalance: initKeyBalance,
+								turn: timesRun
+							})
+						}
+					}
 
 					// Run the update function for all the Agents
 					scheduler.update()
